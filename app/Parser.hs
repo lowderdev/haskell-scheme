@@ -1,9 +1,11 @@
 module Parser where
 
 import Control.Monad (liftM)
+import Control.Monad.Except
 import LispVal
 import Text.ParserCombinators.Parsec
-  ( Parser,
+  ( ParseError,
+    Parser,
     char,
     choice,
     digit,
@@ -22,11 +24,46 @@ import Text.ParserCombinators.Parsec
     (<|>),
   )
 
-readExpr :: String -> LispVal
+type ThrowsError = Either LispError
+
+trapError :: (MonadError a m, Show a) => m String -> m String
+trapError action = catchError action (return . show)
+
+extractValue :: ThrowsError a -> a
+extractValue (Left _) = error "extractValue called on error"
+extractValue (Right val) = val
+
+data LispError
+  = NumArgs Integer [LispVal]
+  | TypeMismatch String LispVal
+  | Parser ParseError
+  | BadSpecialForm String LispVal
+  | NotFunction String String
+  | UnboundVar String String
+  | Default String
+
+showError :: LispError -> String
+showError (UnboundVar message varname) = message ++ ": " ++ varname
+showError (BadSpecialForm message form) = message ++ ": " ++ show form
+showError (NotFunction message func) = message ++ ": " ++ show func
+showError (NumArgs expected found) =
+  "Expected " ++ show expected
+    ++ " args; found values "
+    ++ unwordsList found
+showError (TypeMismatch expected found) =
+  "Invalid type: expected " ++ expected
+    ++ ", found "
+    ++ show found
+showError (Parser parseErr) = "Parse error at " ++ show parseErr
+showError _ = error "todo"
+
+instance Show LispError where show = showError
+
+readExpr :: String -> ThrowsError LispVal
 readExpr input =
   case parse parseExpr "lisp" input of
-    Left err -> String $ "No match: " ++ show err
-    Right val -> val
+    Left err -> throwError $ Parser err
+    Right val -> return val
 
 parseExpr :: Parser LispVal
 parseExpr =

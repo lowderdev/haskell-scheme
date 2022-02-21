@@ -1,15 +1,11 @@
 module Main where
 
 import Evaluator (eval)
-import Parser (readExpr)
+import Parser (extractValue, readExpr, trapError)
 import System.Environment (getArgs)
 
--- main :: IO ()
--- main = do
---   args <- getArgs
---   case args of
---     [] -> putStrLn "Please pass an input to be parsed"
---     (expr : _) -> putStrLn (readExpr expr)
-
 main :: IO ()
-main = getArgs >>= print . eval . readExpr . head
+main = do
+  args <- getArgs
+  let evaled = fmap show $ readExpr (head args) >>= eval
+  putStrLn $ extractValue $ trapError evaled
