@@ -1,0 +1,70 @@
+(define (addOne x)
+  (+ x 1))
+
+(define (zero f)
+  (define (g x)
+    x))
+
+(define (one f)
+  (define (g x)
+    (f x)))
+
+(define (two f)
+  (define (a x)
+    (f (f x))))
+
+(define (three f)
+  (define (a x)
+    (((successor two) f) x)))
+
+(define (successor n)
+  (define (a f)
+    (define (b x)
+      (f ((n f) x)))))
+
+(define (plus m)
+  (define (a n)
+    (define (b f)
+      (define (c x)
+        ((m f) ((n f) x))))))
+
+(define (double n)
+  ((plus n) n))
+
+(define (multiply m)
+  (define (a n)
+    (define (b f)
+      (define (c x)
+        ((m (n f)) x)))))
+
+(define (exp m)
+  (define (a n)
+    (n m)))
+
+(define (predecessor n)
+  (define (a f)
+    (define (b x)
+      (((n (define (c g)
+        (define (aa h)
+          (h (g f))))) (define (bb u)
+            x)) (define (cc u)
+              u)))))
+
+(define (minus m)
+  (define (a n)
+    ((n predecessor) m)))
+
+((one addOne) 41)
+(((successor zero) addOne) 0)
+(((successor one) addOne) 0)
+((((plus two) two) addOne) 0)
+((three addOne) 0)
+(((double three) addOne) 0)
+((((multiply three) three) addOne) 0)
+((((exp two) three) addOne) 0)
+(((predecessor three) addOne) 0)
+((((minus three) two) addOne) 0)
+
+(addOne 1)
+(addOne (+ (addOne 3) 2))
+("h" 1 2)
